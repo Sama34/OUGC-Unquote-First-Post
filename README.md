@@ -6,7 +6,7 @@ Disables the quoting of the first post of any thread.
 ***
 
 ### Requirements
-- [MyBB](http://www.mybb.com/downloads "Download MyBB") version 1.6.5+
+- [MyBB](http://www.mybb.com/downloads "Download MyBB") version 1.8+
 
 ### Installation
 1. Upload the content of the "upload" folder to your MyBB root folder.

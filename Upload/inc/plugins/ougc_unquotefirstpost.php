@@ -48,10 +48,9 @@ function ougc_unquotefirstpost_info()
 		'website'		=> 'http://omarg.me',
 		'author'		=> 'Omar G.',
 		'authorsite'	=> 'http://omarg.me',
-		'version'		=> '0.1',
-		'versioncode'	=> '0100',
-		'compatibility'	=> '16*',
-		'guid' 			=> ''
+		'version'		=> '1.0',
+		'versioncode'	=> 1000,
+		'compatibility'	=> '18*'
 	);
 }
 
@@ -111,22 +110,21 @@ function ougc_unquotefirstpost_uninstall()
 	}
 	else
 	{
-		global $db;
-
-		$db->delete_query('datacache', 'title=\'ougc_plugins\'');
-		!is_object($cache->handler) or $cache->handler->delete('ougc_plugins');
+		$cache->delete('ougc_plugins');
 	}
 }
 
 // Remove quote buttons
 function ougc_unquotefirstpost_postbit(&$post)
 {
-	global $plugins, $thread;
-
-	$plugins->remove_hook('postbit', 'ougc_unquotefirstpost_postbit');
+	global $thread;
 
 	if($thread['firstpost'] == $post['pid'])
 	{
+		global $plugins;
+
+		$plugins->remove_hook('postbit', 'ougc_unquotefirstpost_postbit');
+
 		$post['button_multiquote'] = $post['button_quote'] = '';
 	}
 }
