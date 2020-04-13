@@ -1,5 +1,5 @@
 ## OUGC Unquote First Post
-Disables the quoting of the first post of any thread.
+Disable the quote button for threads or all posts.
 
 ***
 

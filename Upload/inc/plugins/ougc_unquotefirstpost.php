@@ -213,22 +213,41 @@ function ougc_unquotefirstpost()
 		return;
 	}
 
-	switch((int)$mybb->settings['ougc_unquotefirstpost_type'])
-	{
-		case 0:
-			$where = '=t.firstpost';
-			break;
-		case 1:
-			$where = '<0';
-			break;
-		default:
-			$where = '!=t.firstpost';
-			break;
-	}
+	$where = array();
 
 	if((int)$mybb->settings['ougc_unquotefirstpost_forums'] != -1)
 	{
-		$where .= " AND t.fid NOT IN (".implode(",", array_map('intval', explode(',', $mybb->settings['ougc_unquotefirstpost_forums']))).")";
+		$fids = implode(",", array_map('intval', explode(',', $mybb->settings['ougc_unquotefirstpost_forums'])));
+
+		$where[] = "t.fid NOT IN ({$fids})";
+
+		switch((int)$mybb->settings['ougc_unquotefirstpost_type'])
+		{
+			case 0:
+				$where[] = "(t.fid IN ({$fids}) AND p.pid=t.firstpost)";
+				break;
+			case 1:
+				$where[] = "(t.fid IN ({$fids}) AND p.pid<0)";
+				break;
+			default:
+				$where[] = "(t.fid IN ({$fids}) AND p.pid!=t.firstpost)";
+				break;
+		}
+	}
+	else
+	{
+		switch((int)$mybb->settings['ougc_unquotefirstpost_type'])
+		{
+			case 0:
+				$where[] = 'p.pid=t.firstpost';
+				break;
+			case 1:
+				$where[] = 'p.pid<0';
+				break;
+			default:
+				$where[] = 'p.pid!=t.firstpost';
+				break;
+		}
 	}
 
 	if($plugins->current_hook == 'newthread_start' && (int)$mybb->input['load_all_quotes'] != 1):
@@ -242,7 +261,7 @@ function ougc_unquotefirstpost()
 		{
 			if(!$write_query && my_strpos($string, \''.$match.'\'))
 			{
-				$string = str_replace(\'WHERE \', \'WHERE p.pid'.$where.' AND \', $string);
+				$string = str_replace(\'WHERE \', \'WHERE ('.implode(' OR ', $where).') AND \', $string);
 			}
 			return parent::query($string, $hide_errors, $write_query);
 		}
