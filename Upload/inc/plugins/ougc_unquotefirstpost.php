@@ -39,6 +39,9 @@ if(!defined('IN_ADMINCP'))
 	$plugins->add_hook('xmlhttp_get_multiquoted_intermediate', 'ougc_unquotefirstpost');
 }
 
+// PLUGINLIBRARY
+defined('PLUGINLIBRARY') or define('PLUGINLIBRARY', MYBB_ROOT.'inc/plugins/pluginlibrary.php');
+
 // Plugin API
 function ougc_unquotefirstpost_info()
 {
