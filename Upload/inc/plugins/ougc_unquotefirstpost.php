@@ -147,7 +147,7 @@ function ougc_unquotefirstpost_uninstall()
 	global $cache, $PL;
 
 	// Delete settings
-	$PL->settings_delete('ougc_customrep');
+	$PL->settings_delete('ougc_unquotefirstpost');
 
 	// Remove version code from cache
 	$plugins = (array)$cache->read('ougc_plugins');
