@@ -2,7 +2,7 @@
 
 /***************************************************************************
  *
- *    OUGC Unquote First Post plugin (/inc/plugins/ougc_unquotefirstpost.php)
+ *    ougc Unquote First Post plugin (/inc/plugins/ougc_unquotefirstpost.php)
  *    Author: Omar Gonzalez
  *    Copyright: © 2012 - 2020 Omar Gonzalez
  *
@@ -45,7 +45,7 @@ function ougc_unquotefirstpost_info()
     isset($lang->ougc_unquotefirstpost) || $lang->load('ougc_unquotefirstpost');
 
     return array(
-        'name' => 'OUGC Unquote First Post',
+        'name' => 'ougc Unquote First Post',
         'description' => $lang->ougc_unquotefirstpost_desc,
         'website' => 'https://ougc.network',
         'author' => 'Omar G.',
