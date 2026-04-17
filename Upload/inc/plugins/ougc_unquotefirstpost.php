@@ -37,6 +37,9 @@ if (!defined('IN_ADMINCP')) {
     $plugins->add_hook('xmlhttp_get_multiquoted_intermediate', 'ougc_unquotefirstpost');
 }
 
+// PLUGINLIBRARY
+defined('PLUGINLIBRARY') or define('PLUGINLIBRARY', MYBB_ROOT.'inc/plugins/pluginlibrary.php');
+
 // Plugin API
 function ougc_unquotefirstpost_info()
 {
@@ -144,23 +147,27 @@ function ougc_unquotefirstpost_is_installed()
 // _uninstall() routine
 function ougc_unquotefirstpost_uninstall()
 {
-    global $cache, $PL;
+	global $cache, $PL;
 
-    // Delete settings
-    $PL->settings_delete('ougc_customrep');
+	// Delete settings
+	$PL->settings_delete('ougc_unquotefirstpost');
 
-    // Remove version code from cache
-    $plugins = (array)$cache->read('ougc_plugins');
+	// Remove version code from cache
+	$plugins = (array)$cache->read('ougc_plugins');
 
-    if (isset($plugins['unquotefirstpost'])) {
-        unset($plugins['unquotefirstpost']);
-    }
+	if(isset($plugins['unquotefirstpost']))
+	{
+		unset($plugins['unquotefirstpost']);
+	}
 
-    if ($plugins) {
-        $cache->update('ougc_plugins', $plugins);
-    } else {
-        $PL->cache_delete('ougc_plugins');
-    }
+	if($plugins)
+	{
+		$cache->update('ougc_plugins', $plugins);
+	}
+	else
+	{
+		$PL->cache_delete('ougc_plugins');
+	}
 }
 
 // Remove quote buttons
@@ -204,47 +211,62 @@ function ougc_unquotefirstpost_postbit(&$post)
 // Do the magic
 function ougc_unquotefirstpost()
 {
-    global $plugins, $mybb, $fid, $thread, $post, $pid, $tid, $forum;
+	global $plugins, $mybb, $fid, $thread, $post, $pid, $tid, $forum;
 
-    if (!is_member(
-            $mybb->settings['ougc_unquotefirstpost_groups']
-        ) || !(int)$mybb->settings['ougc_unquotefirstpost_forums']) {
-        return;
-    }
+	if(!is_member($mybb->settings['ougc_unquotefirstpost_groups']) || !(int)$mybb->settings['ougc_unquotefirstpost_forums'])
+	{
+		return;
+	}
 
-    switch ((int)$mybb->settings['ougc_unquotefirstpost_type']) {
-        case 0:
-            $where = '=t.firstpost';
-            break;
-        case 1:
-            $where = '<0';
-            break;
-        default:
-            $where = '!=t.firstpost';
-            break;
-    }
+	$where = array();
 
-    if ((int)$mybb->settings['ougc_unquotefirstpost_forums'] != -1) {
-        $where .= ' AND t.fid NOT IN (' . implode(
-                ',',
-                array_map('intval', explode(',', $mybb->settings['ougc_unquotefirstpost_forums']))
-            ) . ')';
-    }
+	if((int)$mybb->settings['ougc_unquotefirstpost_forums'] != -1)
+	{
+		$fids = implode(",", array_map('intval', explode(',', $mybb->settings['ougc_unquotefirstpost_forums'])));
 
-    if ($plugins->current_hook == 'newthread_start' && (int)$mybb->input['load_all_quotes'] != 1):
-        $match = 'COUNT(*) AS quotes';
-    else:
-        $match = 'p.subject, p.message, p.pid, p.tid, p.username, p.dateline';
-    endif;
+		$where[] = "t.fid NOT IN ({$fids})";
 
-    control_object(
-        $GLOBALS['db'],
-        '
+		switch((int)$mybb->settings['ougc_unquotefirstpost_type'])
+		{
+			case 0:
+				$where[] = "(t.fid IN ({$fids}) AND p.pid=t.firstpost)";
+				break;
+			case 1:
+				$where[] = "(t.fid IN ({$fids}) AND p.pid<0)";
+				break;
+			default:
+				$where[] = "(t.fid IN ({$fids}) AND p.pid!=t.firstpost)";
+				break;
+		}
+	}
+	else
+	{
+		switch((int)$mybb->settings['ougc_unquotefirstpost_type'])
+		{
+			case 0:
+				$where[] = 'p.pid=t.firstpost';
+				break;
+			case 1:
+				$where[] = 'p.pid<0';
+				break;
+			default:
+				$where[] = 'p.pid!=t.firstpost';
+				break;
+		}
+	}
+
+	if($plugins->current_hook == 'newthread_start' && (int)$mybb->input['load_all_quotes'] != 1):
+		$match = 'COUNT(*) AS quotes';
+	else:
+		$match = 'p.subject, p.message, p.pid, p.tid, p.username, p.dateline';
+	endif;
+
+	control_object($GLOBALS['db'], '
 		function query($string, $hide_errors=0, $write_query=0)
 		{
 			if(!$write_query && my_strpos($string, \'' . $match . '\'))
 			{
-				$string = str_replace(\'WHERE \', \'WHERE p.pid' . $where . ' AND \', $string);
+				$string = str_replace(\'WHERE \', \'WHERE ('.implode(' OR ', $where).') AND \', $string);
 			}
 			return parent::query($string, $hide_errors, $write_query);
 		}

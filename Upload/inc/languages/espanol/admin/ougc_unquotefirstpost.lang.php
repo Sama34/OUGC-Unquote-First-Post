@@ -27,8 +27,9 @@
  ****************************************************************************/
 
 // Plugin API
+
 $l['ougc_unquotefirstpost'] = 'ougc Unquote First Post';
-$l['ougc_unquotefirstpost_desc'] = 'Desabilita la opcion de citar los temas, mensajes, o ambos.';
+$l['ougc_unquotefirstpost_desc'] = 'Deshabilita la opción de citar los temas, mensajes, o ambos.';
 
 // PluginLibrary
 $l['ougc_unquotefirstpost_pluginlibrary_error'] = 'Este plugin require <a href="{1}">PluginLibrary</a> version {2} o mas. Por favor sube los arhivos necesarios.';
